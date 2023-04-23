@@ -6,14 +6,19 @@
                 <div class="infor-staff-title">
                     <div class="text">Thông tin nhân viên</div>
                     <div class="box">
-                        <input type="checkbox">
+                        <input 
+                        type="checkbox"
+                        property-name= "IsCustomer"
+                        v-model="employee.isCustomer">
                         <p>Là khách hàng</p>
                     </div>
                     <div class="box">
-                        <input type="checkbox">
+                        <input type="checkbox" 
+                        property-name= "IsEmployee"
+                        v-model="employee.isEmployee">
                         <p>Là nhà cung cấp</p>
                     </div>
-                    <div class="icon-close" id="icon-close" @click.prevent="btnCloseOnClick">x</div>
+                    <div class="icon-close" id="icon-close" @click.prevent="btnCloseOnClick()">x</div>
                 </div>
                 <div class="infor-staff-content">
                     <div class="m-group-row">
@@ -22,79 +27,97 @@
                                 <label for="">Mã<span class="required">*</span></label>
                                 <input 
                                 type="text" 
+                                tabindex="1"
                                 ref="staffId"
                                 id="staff-id" 
                                 property-name= "EmployeeCode"
                                 :class="{'error-border':invalidEmployeeCode}"
                                 @blur="$event => onValidateEmployeeCode()"
-                                v-model="employee.EmployeeCode"
+                                v-model="employee.employeeCode"
                                 class="input-staff-id">
                                 <p class="error-info margin-0px">{{ errorEmployeeCode }}</p>
                             </div>
                             <div class="staff-name ">
                                 <label for="">Tên<span class="required">*</span></label>
                                 <input 
-                                type="text"  
+                                type="text" 
+                                tabindex="2" 
                                 id="staff-name" 
                                 property-name= "FullName"
                                 :class="{'error-border':invalidEmployeeName}"
                                 @blur="$event => onValidateEmployeeName()"
-                                v-model="employee.FullName"
+                                v-model="employee.fullName"
                                 class="input-staff-name">
                                 <p class="error-info margin-0px">{{ errorEmployeeName }}</p>
                             </div>
                             <div class="staff-date">
                                 <label for="">Ngày sinh</label>
                                 <input 
+                                tabindex="3"
                                 property-name= "DateOfBirth"
-                                v-model="employee.DateOfBirth"
+                                v-model="employee.dateOfBirth"
                                 type="date" id="staff-date" 
                                 class="input-staff-date">
                             </div>
                             <div class="staff-sex">
                                 <label for="">Giới tính</label>
                                 <div class="select-sex">
-                                    <input type="radio" name="sex" class="input-staff-female">
-                                    <label for="">nam</label>
-                                    <input type="radio" name="sex" class="input-staff-male">
+                                    <input type="radio" 
+                                    tabindex="4"
+                                    :value= 'male'
+                                    class="input-staff-female" 
+                                    v-model="employee.gender">
+                                    <label for="">Nam</label>
+                                    <input 
+                                    type="radio" 
+                                    tabindex="5"
+                                    :value= 'female'
+                                    v-model="employee.gender"
+                                    class="input-staff-male">
                                     <label for="">nữ</label>
-                                    <input type="radio" name="sex" class="input-staff-other">
+                                    <input 
+                                    tabindex="6"
+                                    type="radio" 
+                                    :value='other' 
+                                    v-model="employee.gender"
+                                    class="input-staff-other">
                                     <label for="">khác</label>
                                 </div>
                             </div>
                         </div>
                         <div class="m-row">
-                            <div class="staff-position">
+                            <div class="staff-position" id="staff-position">
                                 <label for="">Đơn vị<span class="required">*</span></label>
-                                <select 
-                                type="text"  
-                                id="staff-position" 
-                                property-name= "DepartmentName"
+                                <TheDropdown 
+                                tabindex="7"
+                                textSelect = "Chọn công ty" 
+                                :items="listDepartmentCombobox" 
+                                :itemSelected ="departmentName"
+                                :isItemObject="true"
+                                @sendItem="receiveItem"
                                 :class="{'error-border':invalidEmployeePosition}"
-                                @blur="$event => onValidateEmployeePosition()"
-                                v-model="employee.DepartmentId"
-                                class="input-staff-position">
-                                    <option value="78aafe4a-67a7-2076-3bf3-eb0223d0a4f7">Phòng nhân sự</option>
-                                    <option value="45ac3d26-18f2-18a9-3031-644313fbb055">Phòng hành chính</option>
-                                    <option value="3f8e6896-4c7d-15f5-a018-75d8bd200d7c">Phòng công nghệ thông tin</option>
-                                </select>
+                                @sendValidate="onValidateEmployeePosition"
+                                ></TheDropdown>
                                 <p class="error-info margin-0px">{{ errorEmployeePosition }}</p>
                             </div>
                             <div class="staff-cmnd">
                                 <label for="">Số CMND</label>
                                 <input 
+                                tabindex="8"
                                 type="text" 
                                 class="input-staff-cmnd"
                                 property-name= "IdentityNumber"
-                                v-model="employee.IdentityNumber">
+                                v-model="employee.identityNumber">
                             </div>
                             <div class="staff-cmnd-date">
                                 <label for="">Ngày cấp</label>
                                 <input 
+                                tabindex="9"
                                 type="date" 
                                 class="input-staff-cmnd-date"
                                 property-name= "IdentityDate"
-                                v-model="employee.IdentityDate">
+                                v-model="employee.identityDate"
+                                >
                             </div>
                         </div>
                         <div class="m-row">
@@ -102,17 +125,19 @@
                                 <label for="">Chức danh</label>
                                 <input 
                                 type="text" 
+                                tabindex="10"
                                 class="input-staff-job"
                                 property-name= "PositionName"
-                                v-model="employee.PositionName">
+                                v-model="employee.position">
                             </div>
                             <div class="staff-cmnd-place">
                                 <label for="">Nơi cấp</label>
                                 <input 
                                 type="text" 
+                                tabindex="11"
                                 class="input-staff-cmnd-place"
                                 property-name= "IdentityPlace"
-                                v-model="employee.IdentityPlace">
+                                v-model="employee.identityPlace">
                             </div>
                         </div>
                     </div>
@@ -121,10 +146,11 @@
                             <div class="staff-address">
                                 <label for="">Địa chỉ</label>
                                 <input 
+                                tabindex="12"
                                 type="text" 
                                 class="input-staff-address"
                                 property-name= "Address"
-                                v-model="employee.Address">
+                                v-model="employee.address">
                             </div>
                         </div>
                         <div class="m-row">
@@ -132,46 +158,68 @@
                                 <label for="">ĐT di động</label>
                                 <input 
                                 type="text" 
+                                tabindex="13"
                                 class="input-staff-mobile-number"
                                 property-name= "PhoneNumber"
-                                v-model="employee.PhoneNumber">
+                                v-model="employee.phoneNumber">
                             </div>
                             <div class="staff-landline-number">
                                 <label for="">ĐT cố định</label>
-                                <input type="text" class="input-staff-landline-number">
+                                <input 
+                                tabindex="14"
+                                type="text" 
+                                class="input-staff-landline-number"
+                                property-name="TelephoneNumber"
+                                v-model="employee.telephoneNumber">
                             </div>
                             <div class="staff-email">
                                 <label for="">Email</label>
                                 <input 
                                 type="text" 
+                                tabindex="15"
                                 class="input-staff-email"
                                 property-name= "Email"
-                                v-model="employee.Email">
+                                v-model="employee.email">
                             </div>
                         </div>
                         <div class="m-row">
                             <div class="staff-bank-number">
                                 <label for="">Tài khoản ngân hàng   </label>
-                                <input type="text" class="input-staff-bank-number">
+                                <input type="text" 
+                                tabindex="16"
+                                class="input-staff-bank-number"
+                                property-name= "BankAccount"
+                                v-model="employee.bankAcount"
+                                >
                             </div>
                             <div class="staff-bank">
                                 <label for="">Tên ngân hàng</label>
-                                <input type="text" class="input-staff-bank">
+                                <input type="text" 
+                                tabindex="17"
+                                class="input-staff-bank"
+                                property-name= "BankName"
+                                v-model="employee.bankName"
+                                >
                             </div>
                             <div class="staff-bank-place">
                                 <label for="">Chi nhánh</label>
-                                <input type="text" class="input-staff-bank-place">
+                                <input type="text" 
+                                tabindex="18"
+                                class="input-staff-bank-place"
+                                property-name= "BankBranch"
+                                v-model="employee.bankBranch"
+                                >
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="group-btn">
                     <div class="group-btn-left">
-                        <button>Hủy</button>
+                        <button tabindex="21" @click.prevent="btnSaveOnClick()">Hủy</button>
                     </div>
                     <div class="group-btn-right">
-                        <button class="btn-save" @click.prevent="btnSaveOnClick()">Cất</button>
-                        <button class="btn-add" id="btn-add-employee">Cất và Thêm</button>
+                        <button tabindex="19" class="btn-save" @click.prevent="btnSaveOnClick(false)">Cất</button>
+                        <button tabindex="20" class="btn-add" id="btn-add-employee" @click.prevent="btnSaveOnClick(true)">Cất và Thêm</button>
                     </div>
                 </div>
             </div>
@@ -189,9 +237,11 @@
     v-if="showActionMessage"
     :text = "saveEmployeeMsg"
     @onCloseMsg="$event => showActionMessage = false"
-    @onSaveEmployee="$event => saveEmployee()"
+    @onSaveEmployee="$event => btnSaveOnClick()"
     @onNoSaveEmployee="$event => noSaveEmployee()"
     ></NotificationActSave>
+
+
 
 </template>
 
@@ -199,20 +249,21 @@
 import MISAEnum from '@/helpers/enum';
 import ErrorNotification from './ErrorNotification.vue'
 import NotificationActSave from './NotificationActSave.vue';
-import axiosClient from '@/api/base';
+import EmployeeService from '@/services/EmpoyeeService';
 
 
 export default {
   name: 'DialogEmployee',
-  props: ["employeeItem", "formMode","receiveListEmployee"],
+  props: ["employeeItem", "formMode","receiveListEmployee", "receiveListDepartment"],
   components: {
     ErrorNotification,
     NotificationActSave,
   },
   created() {
-
     this.displayForm();
-
+    this.formatDate();
+    this.getDepartmentComboboxs();
+    this.getDepartmentName(this.employee.departmentId)
   },
 
   mounted() {
@@ -223,8 +274,13 @@ export default {
   data() {
     return {
 
+        true: true,
+        false: false,
+        employeeService: new EmployeeService(),
+
         // Tiêu đề của thông báo lỗi validate dữ liệu
         errorValidate: MISAEnum.Validate.Title,
+
         // Tiêu đề của thông báo thực hiện hành động lưu hay không lưu
         saveEmployeeMsgTitle: MISAEnum.saveMessage.title,
         saveEmployeeMsg: MISAEnum.saveMessage.content,
@@ -236,17 +292,30 @@ export default {
         invalidEmployeeCode: false,
         invalidEmployeeName: false,
         invalidEmployeePosition: false,
+
         // Các biến lưu thông báo lỗi nếu có
         errorEmployeeCode: "",
         errorEmployeeName: "",
         errorEmployeePosition: "",
+
+        // Biến lưu thông tin giới tính
+        male: MISAEnum.Gender.Male,
+        female: MISAEnum.Gender.Female,
+        other: MISAEnum.Gender.Other,
+
         // Biến lưu thông tin nhân viên vừa nhập vào form 
-        employee: {},
         dataGOC: null,
+
         // Biến xác định có hiển thị thông báo lỗi hay không
         showErrorEmployee: false,
+
         // Biến xác định có hiển thị thông báo thực hiện hành động sau khi sửa đổi dữ liệu hay không
         showActionMessage: false,
+
+        // 
+        employee: {},
+        listDepartmentCombobox: [],
+        departmentName: "",
     }
   },
 
@@ -262,15 +331,12 @@ export default {
         // 1. Kiểm tra nếu form hiển thị với chức năng thêm nhân viên mói thì tự động tạo mã nhân viên
         if (this.formMode == MISAEnum.FormMode.Add) {
             // Lấy mã nhân viên mới
-            axiosClient.get("/employees/NewEmployeeCode")
-            .then(res => {
-                const newEmployee = res.data
-                this.employee.EmployeeCode = newEmployee;
-                console.log(res.data);
-            })
-            .catch((error) => {
-                console.log(error)
-            })
+            this.employeeService.getNewEmployeeCode().then((res) => {
+                this.employee.employeeCode = res;
+                console.log(this.employee.employeeCode);
+            }).catch((err) => {
+                console.log(err);
+            });
         } else {
         // 2. Nếu form hiện lên với chức năng sửa thông tin nhân viên thì lưu lại thông tin lên form
             // 2.1. Lưu lại data gốc
@@ -292,6 +358,17 @@ export default {
     },
 
      /**
+     * Mô tả: 
+     * @param: Nhân item trong combobox 
+     * return: 
+     * Created by: nttrang
+     * Created date: 19/04/2023
+     */
+     receiveItem(e) {
+        this.employee.departmentId = e;
+      },
+
+     /**
      * Mô tả: Hàm đóng form thông tin nhân viên
      * @param: 
      * return: 
@@ -303,12 +380,9 @@ export default {
         var newData = JSON.stringify(this.employee);
         if (newData != this.dataGOC){
             this.showActionMessage = true;
-            console.log(this.showActionMessage)
-            alert("hihi")
+        } else {
+            this.closeDialog();
         }
-        // Đóng form thông tin nhân viên 
-        this.closeDialog();
-        // this.$emit("onCloseDialog")
     },
      /**
      * Mô tả:  Hàm báo lỗi khi mã nhân viên nhập vào không hợp lệ
@@ -319,7 +393,7 @@ export default {
      */
     onValidateEmployeeCode() {
         // 1. lấy dữ liệu từ ô input
-        const employeeCode = this.employee.EmployeeCode;
+        const employeeCode = this.employee.employeeCode;
         // 2. kiểm tra nếu không có dữ liệu set border thành màu đỏ và hiển thị thông báo lỗi
         if(employeeCode == "" || employeeCode == undefined){
             // 2.1. Gán giá trị lỗi bằng true
@@ -350,7 +424,7 @@ export default {
      */
     onValidateEmployeeName() {
         // 1. lấy dữ liệu từ ô input
-        const employeeName = this.employee.FullName;
+        const employeeName = this.employee.fullName;
         // 2. kiểm tra nếu không có dữ liệu set border thành màu đỏ và hiển thị thông báo lỗi
         if(employeeName == "" || employeeName == undefined){
             // 2.1. Gán giá trị lỗi bằng true
@@ -379,11 +453,12 @@ export default {
      * Created by: nttrang
      * Created date: 02/04/2023
      */
-    onValidateEmployeePosition() {
+    onValidateEmployeePosition(e) {
+        const input = e;
         // 1. lấy dữ liệu từ ô input
-        const employeePosition = this.employee.DepartmentId;
+        // const employeePosition = this.employee.departmentId;
         // 2. kiểm tra nếu không có dữ liệu set border thành màu đỏ và hiển thị thông báo lỗi
-        if(employeePosition == "" || employeePosition == undefined){
+        if(input ==""){
             // 2.1. Gán giá trị lỗi bằng true
             this.invalidEmployeePosition = true;
             // 2.2. Thêm thông tin lỗi để hiển thị cho người dùng
@@ -403,6 +478,29 @@ export default {
         }
     },
 
+    /**
+     * Mô tả: Hàm định dạng lại ngày tháng năm
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 02/04/2023
+     */
+     formatDate() {
+        try {
+            let date = this.employee.dateOfBirth
+                    date = new Date(date)
+                    let dateValue = date.getDate()
+                    let monthValue = date.getMonth()+1
+                    let yearValue = date.getFullYear()
+                    if(dateValue<10) dateValue =`0${dateValue}`
+                    if(monthValue<10) monthValue=`0${monthValue}`
+                    this.employee.dateOfBirth = `${yearValue}-${monthValue}-${dateValue}`
+                    this.employee.identityDate = `${yearValue}-${monthValue}-${dateValue}`
+        } catch (error) {
+            console.log(error)
+        }
+    },
+
      /**
      * Mô tả: Hàm thực hiện thao tác sau khi nhập thông tin
      * @param: 
@@ -410,14 +508,16 @@ export default {
      * Created by: nttrang
      * Created date: 02/04/2023
      */
-    btnSaveOnClick() {
+    btnSaveOnClick(isContinue) {
         // 1. Kiểm tra dữ liệu nhập vào đã hợp lệ hay chưa nếu lỗi thì hiển thị thông báo lỗi
         const check = this.checkDuplicateCode();
+        console.log(check);
         if(this.invalidEmployeeCode || this.invalidEmployeeName || this.invalidEmployeePosition || check) {
+            this.showActionMessage = false;
             this.showErrorEmployee = true;
         } else {
             //2. Nếu không có lỗi khi nhập thông tin thì hiển thị thông báo xác nhận lưu dữ liệu cho người dùng
-            this.showActionMessage = true;
+            this.saveEmployee(isContinue);
         }
 
     },
@@ -429,37 +529,34 @@ export default {
      * Created by: nttrang
      * Created date: 02/04/2023
      */
-    saveEmployee() {
+    async saveEmployee(isContinue) {
         // Kiểm tra đang thực hiện thao tác thêm mới hay sửa bản ghi
         if(this.formMode == MISAEnum.FormMode.Add) {
             var newEmployee = this.employee;
-             axiosClient.post("/employees", newEmployee)
-                .then(res => {
-                    console.log(res.data);
+            this.employeeService.add(newEmployee);
                     this.showActionMessage = false;
                     // Đóng form 
                     this.closeDialog();
                     // reload data
-                    this.reloadData();
-
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+                    // this.reloadData();
+                    this.$emit("showAddSuccessToast");
         } else {
             var newEmployeeUpdate = this.employee;
-            axiosClient.put(`/employees/${this.employeeItem.EmployeeId}`, newEmployeeUpdate)
-                .then(res => {
-                    console.log(res);
+            this.employeeService.update(newEmployeeUpdate)
                     this.showActionMessage = false;
                     // Đóng form 
                     this.closeDialog();
                     // reload data
-                    this.reloadData();
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
+                    // this.reloadData();
+                    // this.$emit("reloadEmployee");
+                    this.$emit("showUpdateSuccessToast");
+        }
+
+        // Kiểm tra xem người dùng có muốn thêm mới tiep hay không
+        if(isContinue) {
+            this.closeDialog();
+        } else {
+            this.closeDialog();
         }
     },
 
@@ -488,6 +585,42 @@ export default {
         const newArray = array.filter(item => item !== element)
         return newArray;
     },
+
+     /**
+     * Mô tả: Lấy tên đơn vị theo id
+     * @param: id của đơn vị
+     * return: tên đơn vị
+     * Created by: nttrang
+     * Created date: 17/04/2023
+     */
+     getDepartmentComboboxs() {
+        for(let item of this.receiveListDepartment) {
+            var newobject = {
+                id: item.departmentId,
+                name: item.departmentName
+            };
+            this.listDepartmentCombobox.push(newobject);
+        }
+        console.log(this.listDepartmentCombobox)
+    },
+
+     /**
+     * Mô tả: Lấy tên đơn vị theo id
+     * @param: id của đơn vị
+     * return: tên đơn vị
+     * Created by: nttrang
+     * Created date: 17/04/2023
+     */
+     getDepartmentName(element) {
+        if(this.formMode == MISAEnum.FormMode.Update) {
+        const array = this.receiveListDepartment;
+        for(let item of array) {
+            if(item.departmentId == element){
+                this.departmentName = item.departmentName;
+            }
+        }
+        }
+    },
   
     /**
      * Mô tả: Kiểm tra dữ liệu trùng
@@ -497,11 +630,20 @@ export default {
      * Created date: 02/04/2023
      */
     checkDuplicateCode() {
-        const code = this.employee.EmployeeCode;
+        const code = this.employee.employeeCode;
+        const id = this.employee.employeeId;
         let isDuplicate = false;
         if(this.formMode == MISAEnum.FormMode.Add) {
             for(let item of this.receiveListEmployee) {
-                if (item.EmployeeCode == code) {
+                if (item.employeeCode == code) {
+                    isDuplicate = true;
+                    this.addElementInArray(MISAEnum.Validate.duplicateCode, this.listErrorValidate)
+                    // this.listErrorValidate.push(MISAEnum.Validate.duplicateCode);
+                    }
+            }
+        } else {
+            for(let item of this.receiveListEmployee) {
+                if (item.employeeCode == code && item.employeeId != id) {
                     isDuplicate = true;
                     this.addElementInArray(MISAEnum.Validate.duplicateCode, this.listErrorValidate)
                     // this.listErrorValidate.push(MISAEnum.Validate.duplicateCode);
@@ -531,25 +673,6 @@ export default {
      */
     closeDialog(){
         this.$emit("onCloseDialog");
-    },
-
-     /**
-     * Mô tả: Hàm lấy danh sách nhân viên
-     * @param: 
-     * return: 
-     * Created by: nttrang
-     * Created date: 02/04/2023
-     */
-    getEmployee() {
-        // Gọi api để lấy danh sách nhân viên
-        axiosClient.get("/employees")
-            .then(res => {
-                this.listEmployee = res.data;
-                console.log(res.data);
-            })
-            .catch((error) => {
-                console.log(error)
-            })
     },
 
      /**
@@ -1030,6 +1153,7 @@ export default {
 
 .error-border{
     border: 1px solid #E61D1D !important;
+    border-radius: 4px;
 }
 
 .error-info{

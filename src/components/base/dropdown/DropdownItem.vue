@@ -10,7 +10,7 @@ export default {
   name: 'DropdownItem',
   components: {
   },
-  props: ["text"]
+  props: ["text", "selected"]
 }
 </script>
 
@@ -21,6 +21,7 @@ export default {
     padding-left: 7px;
     display: flex;
     align-items: center;
+    border-radius: 4px;
 }
 
 .dropdown-list__item:hover{

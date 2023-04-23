@@ -28,7 +28,11 @@
                     :placeholder="enterUsername"
                     ref="username"
                     :required="true"></MInput> -->
-                    <TheDropdown textSelect = "Chọn công ty" :items="companies"></TheDropdown>
+                    <TheDropdown 
+                    style="margin-top: 0px;" 
+                    textSelect = "Chọn công ty" 
+                    :items="companies" 
+                    @sendItem="receiveItem"></TheDropdown> 
                     <div class="btn-icon">
                         <button class="btn-fill"></button>
                     </div>
@@ -38,7 +42,7 @@
                 </div>  
             </div>
             <div class="m-table-cover">
-                <table class="m-table" id="tbEmployeeList"> 
+                <table class="m-table force-overflow" id="tbEmployeeList"> 
                     <thead>
                         <tr>
                             <th style="width: 35px;">
@@ -49,7 +53,7 @@
                             <th class="text-align-left" model-name="GenderName" style="width: 120px;">GIỚI TÍNH</th>
                             <th class="text-align-center" model-name="DateOfBirth" style="width: 120px;">NGÀY SINH</th>
                             <th class="text-align-right" model-name="IdentityNumber" style="width: 130px;">SỐ CMND</th>
-                            <th class="text-align-left" model-name="PositionName" style="width: 150px;">CHỨC DANH</th>
+                            <th class="text-align-left" model-name="Position" style="width: 150px;">CHỨC DANH</th>
                             <th class="text-align-left" model-name="DepartmentName" style="width: 220px;">TÊN ĐƠN VỊ</th>
                             <th class="text-align-right" model-name="" style="width: 130px;">SỐ TÀI KHOẢN</th>
                             <th class="text-align-left" model-name="" style="width: 160px;">TÊN NGÂN HÀNG</th>
@@ -64,23 +68,23 @@
                         :key = "employee.EmployeeId" 
                         @dblclick="$events => rowOnDblClick(employee)">
                             <td class="text-align-center">
-                                <input type="checkbox" :value="employee.EmployeeId" v-model="check"></td>
-                            <td class="text-align-left">{{employee.EmployeeCode}}</td>
-                            <td class="text-align-left">{{employee.FullName}}</td>
-                            <td class="text-align-left">{{employee.GenderName}}</td>
-                            <td class="text-align-center">{{ formatDate(employee.DateOfBirth) }}</td>
-                            <td class="text-align-right">{{employee.IdentityNumber}}</td>
-                            <td class="text-align-left">{{employee.PositionName}}</td>
-                            <td class="text-align-left">{{employee.DepartmentName}}</td>
-                            <td class="text-align-right"></td>
-                            <td class="text-align-left"></td>
-                            <td class="text-align-left"></td>
-                            <!-- <td class="chucnang">
+                                <input type="checkbox" :value="employee.employeeId" v-model="check"></td>
+                            <td class="text-align-left">{{employee.employeeCode}}</td>
+                            <td class="text-align-left">{{employee.fullName}}</td>
+                            <td class="text-align-left">{{employee.genderName}}</td>
+                            <td class="text-align-center">{{ formatDate(employee.dateOfBirth) }}</td>
+                            <td class="text-align-right">{{employee.identityNumber}}</td>
+                            <td class="text-align-left">{{employee.position}}</td>
+                            <td class="text-align-left">{{getDepartmentName(employee.departmentId)}}</td>
+                            <td class="text-align-right">{{employee.bankAcount}}</td>
+                            <td class="text-align-left">{{employee.bankName}}</td>
+                            <td class="text-align-left">{{employee.bankBranch}}</td>
+                            <td class="chucnang">
                                 <div class="group-icon">
                                     <div class="icon-edit"></div>
                                     <div class="icon-etc"></div>
                                 </div>
-                            </td> -->
+                            </td>
                         </tr>
                     </tbody>
                 </table>
@@ -91,11 +95,11 @@
                     <div class="number-page">
                         <p>Số bản ghi/trang: </p>
                         <div class="page-select">
-                            <select name="" id="">
-                                <option value="">10</option>
-                                <option value="">15</option>
-                                <option value="">20</option>
-                                <option value="">25</option>
+                            <select v-model="pageSize">
+                                <option value="15">15</option>
+                                <option value="20">20</option>
+                                <option value="25">25</option>
+                                <option value="30">30</option>
                             </select>
                         </div>
                     </div>
@@ -112,8 +116,12 @@
     :receiveListEmployee="listEmployee"
     :employeeItem = "employeeSelected"
     :formMode="dialogFormMode"
+    :receiveListDepartment="listDepartment"
     v-if="showDialog" 
-    @onCloseDialog="$event => showDialog = false"></DialogEmployee>
+    @onCloseDialog="$event => showDialog = false"
+    @showAddSuccessToast="this.showAddToastMsg()"
+    @showUpdateSuccessToast="this.showUpdateToastMsg()"
+    ></DialogEmployee>
 
     <NotificationActDelete
     :title="deleteEmployeeMsgTitle"
@@ -124,6 +132,26 @@
     @onCancelDeleteEmployee="$event => cancelDeleteEmployee()"
     ></NotificationActDelete>
 
+    <MToastMessage
+    :textMsg="toastSuccess"
+    :content="addSuccessMsg"
+    v-if="showToastAddMsg"
+    :classIcon="classIconSusscess"
+    ></MToastMessage>
+
+    <MToastMessage
+    :textMsg="toastSuccess"
+    :content="updateSuccessMsg"
+    v-if="showToastUpdateMsg"
+    :classIcon="classIconSusscess"
+    ></MToastMessage>
+
+    <MToastMessage
+    :textMsg="toastSuccess"
+    :content="deleteSuccessMsg"
+    v-if="showToastDeleteMsg"
+    :classIcon="classIconSusscess"
+    ></MToastMessage>
 
 </template>
 
@@ -131,8 +159,11 @@
 import DialogEmployee from '../base/DialogEmployee.vue';
 import TheDropdown from '../base/dropdown/TheDropdown.vue';
 import MISAEnum from '@/helpers/enum';
-import axiosClient from '@/api/base';
 import NotificationActDelete from '../base/NotificationActDelete.vue';
+import EmployeeService from '@/services/EmpoyeeService';
+import departmentService from '@/services/DepartmentService';
+import MToastMessage from '../base/MToastMessage.vue';
+
 
 export default {
   name: 'EmployeeList',
@@ -140,30 +171,65 @@ export default {
     TheDropdown,
     DialogEmployee,
     NotificationActDelete,
+    MToastMessage,
+
   },
 
   created(){
     // Lấy danh sách nhân viên
     this.getEmployee();
+    // this.getEmployeePage();
+    this.getDepartment();
   },
 
   data() {
     return{
+        companySelected: "",
         companies: MISAEnum.Companies,
         check:[],
         selectAll: false,
         showSelect: false,
         showDialog: false,
         listEmployee : [],
+        listDepartment: [],
         employeeSelected: {},
         dialogFormMode: MISAEnum.FormMode.Add,
-        deleteEmployeeMsgTitle: "",
-        showDeleteMsg: false,
+        deleteEmployeeMsgTitle: MISAEnum.deleteMessage.title,
         deleteEmployeeMsg: MISAEnum.deleteMessage.content,
+        showDeleteMsg: false,
+
+        employeeService: new EmployeeService(),
+        departmentService: new departmentService(),
+
+        // Toast Msg
+        acctionToast: MISAEnum.toastMessage.action,
+        toastSuccess: MISAEnum.toastMessage.Success,
+        addSuccessMsg: MISAEnum.toastMessage.addEmployeeSuccess,
+        updateSuccessMsg: MISAEnum.toastMessage.updateEmployeeSuccess,
+        deleteSuccessMsg: MISAEnum.toastMessage.deleteEmployeeSuccess,
+        showToastAddMsg: false,
+        showToastUpdateMsg: false,
+        showToastDeleteMsg: false,
+        classIconSusscess: MISAEnum.ClassIcon.Success,
+
+        // pagging
+        pageSize: 15,
     }
   },
 
   methods: {
+
+     /**
+     * Mô tả: 
+     * @param: Nhân item trong combobox 
+     * return: 
+     * Created by: nttrang
+     * Created date: 19/04/2023
+     */
+    receiveItem(e) {
+        this.companySelected = e;
+      },
+
      /**
      * Mô tả: Hàm hiển thị form thông tin nhân viên khi bấm vào nút thêm mới
      * @param: 
@@ -177,7 +243,7 @@ export default {
         // Lưu lại giá trị để biết đang thực hiện việc thêm nhân viên
         this.dialogFormMode = MISAEnum.FormMode.Add;
     },
-    
+
      /**
      * Mô tả: Hàm hiển thị form sửa thông tin nhân viên khi double click vào bản ghi 
      * @param: 
@@ -224,7 +290,7 @@ export default {
     selectAllEmployee() {
         if(this.selectAll){
             for(let employee of this.listEmployee) {
-                this.addElementInArray(employee.EmployeeId, this.check);
+                this.addElementInArray(employee.employeeId, this.check);
                 this.selectAll = false;
             }
         } 
@@ -249,23 +315,19 @@ export default {
      * Created date: 02/04/2023
      */
     deleteEmployee(){
-        // Duyệt các bản ghi trong mảng các bản ghi được chọn
-        for(let item of this.check) {
-            // Xóa các bản ghi
-            axiosClient.delete(`/employees/${item}`)
-                .then(res => {
-                    console.log(res);
-                })
-                .catch((error) => {
-                    console.log(error)
-                })
-            }
-        // Xóa các bản ghi vừa bị xóa trong mảng
-        this.deleteAllElementInArray(this.check);
+        //Chuyển mảng các bản ghi được chọn thành chuỗi
+        let stringId = this.check.toString();
+        let newStringId = stringId.replace(',', '');
+        // Xóa các bản ghi trong mảng các bản ghi được chọn
+        this.employeeService.deleteByIds(newStringId);
         //reload lại dữ liệu
         this.getEmployee();
+        console.log(this.listEmployee);
+        this.showToastDeleteMsg = true;
+        // Xóa các bản ghi vừa bị xóa trong mảng
+        this.deleteAllElementInArray(this.check);
         this.showDeleteMsg = false;
-        
+        this.hiddenDeleteToastMsg();
 
     },
 
@@ -297,18 +359,54 @@ export default {
      * @param: 
      * return: 
      * Created by: nttrang
-     * Created date: 02/04/2023
+     * Created date: 12/04/2023
      */
-    getEmployee() {
-        // Gọi api để lấy danh sách nhân viên
-        axiosClient.get("/employees")
-            .then(res => {
-                this.listEmployee = res.data;
-                console.log(res.data);
-            })
-            .catch((error) => {
-                console.log(error)
-            })
+    async getEmployee(){
+        this.listEmployee = await this.employeeService.getAll();
+    },
+
+
+     /**
+     * Mô tả: Hàm lấy danh sách nhân viên theo trang
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 12/04/2023
+     */
+     async getEmployeePage(){
+        this.listEmployee = await this.employeeService.getPaging(0,this.pageSize);
+        console.log(this.listEmployee);
+    },
+    
+     /**
+     * Mô tả: Lấy danh sách phòng ban
+     * @param: 
+     * return: Danh sách phòng ban
+     * Created by: nttrang
+     * Created date: 17/04/2023
+     */
+    async getDepartment(){
+        this.listDepartment = await this.departmentService.getAll();
+        // const element = "11452b0c-768e-5ff7-0d63-eeb1d8ed8cef";
+        // const newArray = this.listDepartment.find(item => item.departmentId == element)
+        // console.log(newArray.departmentName);
+    },
+
+     /**
+     * Mô tả: Lấy tên đơn vị theo id
+     * @param: id của đơn vị
+     * return: tên đơn vị
+     * Created by: nttrang
+     * Created date: 17/04/2023
+     */
+     getDepartmentName(element) {
+        const array = this.listDepartment;
+        for(let item of array) {
+            if(item.departmentId == element){
+                return item.departmentName;
+            }
+        }
+        return "";
     },
 
      /**
@@ -332,8 +430,49 @@ export default {
     deleteAllElementInArray(array){
         array.length = 0;
     },
-  },
 
+     /**
+     * Mô tả: hàm hiển thị toastMsg Thêm mới thành công
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 20/04/2023
+     */
+     showAddToastMsg(){
+        this.showToastAddMsg = true;
+        setTimeout(() => {
+            this.showToastAddMsg = false;
+        }, 4000);
+    },
+
+     /**
+     * Mô tả: Hàm hiển thị toastMsg Cập nhật thành công
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 20/04/2023
+     */
+     showUpdateToastMsg(){
+        this.showToastUpdateMsg = true;
+        setTimeout(() => {
+            this.showToastUpdateMsg = false;
+        }, 4000);
+    },
+
+     /**
+     * Mô tả: Hàm hiển thị toast Msg Xóa thành công
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 20/04/2023
+     */
+     hiddenDeleteToastMsg(){
+        setTimeout(() => {
+            this.showToastDeleteMsg = false;
+        }, 4000);
+    },
+
+  }
 }
 
 </script>
@@ -432,6 +571,11 @@ export default {
     overflow: scroll;
 }
 
+.page-grid .m-table-cover::-webkit-scrollbar-thumb{
+  background-image: linear-gradient(-45deg, #6a5af9, #d66efd);
+  border-radius: 50px;
+}
+
 .page-grid .m-table-cover .m-table{
     font-family: Roboto;
     font-size: 14px;
@@ -466,29 +610,43 @@ export default {
     cursor: pointer;
 }
 
+.page-grid .m-table tr:hover .chucnang{
+    display: flex;
+}
+
 tbody tr .chucnang {
+    width: 0px !important;
+    padding-left: 0px !important;
+    padding-right: 0px !important;
     position: relative;
+    display: none;
+    right: 85px;
+    border: 0px solid #FFFFFF !important;
 }
 
 tbody tr .chucnang .group-icon{
     display: flex;
     align-items: center;
+    justify-content: center;
 }
 
 tbody tr .chucnang .group-icon .icon-edit{
-    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -1658px -90px;
-    width: 20px;
-	height: 20px;
+    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -1649px -81px;
+    width: 36px;
+	height: 36px;
     margin-right: 8px;
     border-radius: 50%;
-
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 8px 0 rgba(0, 0, 0, 0.1);
 }
 
 tbody tr .chucnang .group-icon .icon-etc{
-    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -568px -30px;
-    width: 24px;
-	height: 24px;
+    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -562px -24px;
+    width: 36px;
+	height: 36px;
     border-radius: 50%;
+    background-color: #FFFFFF;
+    box-shadow: 0 2px 4px 0 rgba(0, 0, 0, 0.15), 0 4px 8px 0 rgba(0, 0, 0, 0.1);
 
 }
 
@@ -678,16 +836,37 @@ tbody tr .chucnang .group-icon .icon-etc{
 }
 
 .m-pagging .m-pagging-right .icon{
-    background: purple;
-    width: 24px;
+    display: flex;
+    width: auto;
+    align-items: center;
 }
 
 .m-pagging .m-pagging-right .icon .prev{
+    -webkit-mask: url("../../assets/img/Sprites.64af8f61.svg") no-repeat -36px -361px;
+    mask: url("../../assets/img/Sprites.64af8f61.svg") no-repeat -36px -361px;
+    width: 8px;
+	height: 14px;
+    border: none;
+    margin-left: 8px;
+    background-color: #869AB8;
+}
 
+.m-pagging .m-pagging-right .icon .prev:hover{
+    cursor: pointer;
 }
 
 .m-pagging .m-pagging-right .icon .next{
-    
+    -webkit-mask: url("../../assets/img/Sprites.64af8f61.svg") no-repeat -84px -361px;
+    mask: url("../../assets/img/Sprites.64af8f61.svg") no-repeat -84px -361px;
+    width: 8px;
+	height: 14px;
+    border: none;
+    margin-left: 36px;
+    background-color: #869AB8;
+}
+
+.m-pagging .m-pagging-right .icon .next:hover{
+    cursor: pointer;
 }
 
 .text-align-center {
@@ -709,4 +888,5 @@ tbody tr .chucnang .group-icon .icon-etc{
 input[type="checkbox"]:checked{
     background-color: #50B83C;
 }
+
 </style>

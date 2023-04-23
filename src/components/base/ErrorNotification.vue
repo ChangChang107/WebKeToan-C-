@@ -66,7 +66,7 @@ export default {
     bottom: 0;
     right: 0;
     background-color: rgb(4,20,52, 0.5);
-    z-index: 999;
+    z-index: 1000;
 
 }
 

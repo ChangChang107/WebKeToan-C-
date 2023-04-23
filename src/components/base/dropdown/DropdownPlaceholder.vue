@@ -1,8 +1,14 @@
 <template>
-
     <div class="dropdown-select">
-        <span class="select">{{ text }}</span>
-        <i class="fa fa-caret-down icon"></i>
+        <input 
+        type="text" 
+        class="dropdown-input" 
+        :placeholder="text" 
+        v-on:keyup.enter = "sendMessage"
+        v-model="input">
+        <!-- <span class="select">{{ text }}</span> -->
+        <div class="icon">
+        </div>
     </div>
 
 </template>
@@ -13,7 +19,17 @@ export default {
   name: 'DropdownPlaceholder',
   components: {
   },
-  props: ["text"]
+  props: ["text"],
+  data() {
+    return {
+        input: '',
+    }
+  },
+  methods: {
+    sendMessage() {
+      this.$emit('data', this.input);
+    },
+}
 }
 </script>
 
@@ -36,6 +52,27 @@ export default {
 .dropdown-select span{
     color: #9E9E9E;
     font-size: 14px;
+}
+
+.dropdown-select .dropdown-input{
+    width: 100%;
+    height: 100%;
+    border: none;
+    font-size: 14px;
+    /* border-right: 1px solid #E0E1E4; */
+    margin: 10px;
+}
+
+.dropdown-select .dropdown-input:focus{
+    outline: none;
+}
+
+.dropdown-select .icon {
+    -webkit-mask: url("@/assets/img/Sprites.64af8f61.svg") no-repeat -1129px -365px;
+    mask: url("@/assets/img/Sprites.64af8f61.svg") no-repeat -1129px -365px;
+    width: 14px;
+	height: 8px;
+    background-color: #1F1F1F;
 }
 
 </style>

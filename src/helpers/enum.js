@@ -3,6 +3,7 @@ const MISAEnum = {
     Gender: {
         Male: 1,
         Female: 2,
+        Other: 0
     },
     FormMode: {
         Add: 0,
@@ -23,6 +24,17 @@ const MISAEnum = {
     deleteMessage: {
         title: "Xóa tài liệu",
         content: "Các tài liệu bạn đang chọn sẽ bị xóa",
+    },
+    toastMessage: {
+        Success: "Thành công!",
+        addEmployeeSuccess: "Thông tin nhân viên mới đã được thêm",
+        updateEmployeeSuccess: "Thông tin nhân viên đã được cập nhật",
+        deleteEmployeeSuccess: "Thông tin nhân viên đã bị xóa",
+        action: "Hoàn tác",
+    },
+    ClassIcon: {
+        Success: "fa-sharp fa-solid fa-circle-check fa-xl",
+        Faild: "fas fa-times-circle",
     },
     Companies: ["Công ty A", "Công ty B", "Công ty C", "Công ty D"],
 }
