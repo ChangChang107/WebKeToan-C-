@@ -24,8 +24,5 @@ export default {
     border-radius: 4px;
 }
 
-.dropdown-list__item:hover{
-    background-color: rgba(80,184,60,0.1);
-    cursor: pointer;
-}
+
 </style>

@@ -1,5 +1,7 @@
 <template>
-    <div class="dropdown" v-outside="() => this.isOpen = false">
+    <div class="dropdown" v-outside="() => this.isOpen = false" @keydown.down="onArrowDown" 
+            @keydown.up="onArrowUp"
+            @keydown.enter="onEnter">
         <div class="dropdown-select" :class="{ 'border-error': isEmptyInput }">
             <input 
             type="text" 
@@ -177,9 +179,18 @@ export default {
 </script>
 <style scoped>
 
-
+.dropdown-list__item:hover {
+    background-color: rgba(80,184,60,0.1);
+    cursor: pointer;
+}
 
 .is-active {
     background-color: rgba(80,184,60,0.1);
+}
+
+.dropdown:focus {
+    outline: none;
+    border: solid 1px #50b83c;
+    border-radius: 4px;
 }
 </style>
