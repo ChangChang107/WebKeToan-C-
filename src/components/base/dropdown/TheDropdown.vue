@@ -148,8 +148,8 @@ export default {
 
 
 .dropdown:hover .dropdown-list{
-    opacity: 1;
-    visibility: visible;
+    /* opacity: 1; */
+    /* visibility: visible; */
 }
 
 /* .dropdown .dropdown-select{
@@ -223,9 +223,9 @@ export default {
     top: 100%;
     left: 0;
     right: 0;
-    opacity: 0;
-    visibility: hidden;
-    trasition: opacity 0.2s linear, visibility 0.2s linear;
+    /* opacity: 0; */
+    /* visibility: hidden; */
+    /* trasition: opacity 0.2s linear, visibility 0.2s linear; */
 }
 
 /* .dropdown .dropdown-list__item{

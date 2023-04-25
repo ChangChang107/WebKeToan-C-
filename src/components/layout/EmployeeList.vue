@@ -28,11 +28,12 @@
                     :placeholder="enterUsername"
                     ref="username"
                     :required="true"></MInput> -->
-                    <TheDropdown 
+                    <!-- <TheDropdown 
                     style="margin-top: 0px;" 
                     textSelect = "Chọn công ty" 
                     :items="companies" 
-                    @sendItem="receiveItem"></TheDropdown> 
+                    @sendItem="receiveItem"></TheDropdown>  -->
+                    <MCombobox :items="companies"> </MCombobox>
                     <div class="btn-icon">
                         <button class="btn-fill"></button>
                     </div>
@@ -157,22 +158,23 @@
 
 <script>
 import DialogEmployee from '../base/DialogEmployee.vue';
-import TheDropdown from '../base/dropdown/TheDropdown.vue';
+// import TheDropdown from '../base/dropdown/TheDropdown.vue';
 import MISAEnum from '@/helpers/enum';
 import NotificationActDelete from '../base/NotificationActDelete.vue';
 import EmployeeService from '@/services/EmpoyeeService';
 import departmentService from '@/services/DepartmentService';
 import MToastMessage from '../base/MToastMessage.vue';
+import MCombobox from '../base/MCombobox.vue';
 
 
 export default {
   name: 'EmployeeList',
   components: {
-    TheDropdown,
+    // TheDropdown,
     DialogEmployee,
     NotificationActDelete,
     MToastMessage,
-
+    MCombobox,
   },
 
   created(){
@@ -180,7 +182,14 @@ export default {
     this.getEmployee();
     // this.getEmployeePage();
     this.getDepartment();
+    // console.log("page size: ", this.pageSize);
+
   },
+
+  beforeUpdate() {
+    // console.log("page size: ", this.pageSize);
+  },
+
 
   data() {
     return{
@@ -214,6 +223,9 @@ export default {
 
         // pagging
         pageSize: 15,
+        isStop: false,
+        listEmployeeInPage : [],
+
     }
   },
 
@@ -373,11 +385,25 @@ export default {
      * Created by: nttrang
      * Created date: 12/04/2023
      */
-     async getEmployeePage(){
-        this.listEmployee = await this.employeeService.getPaging(0,this.pageSize);
-        console.log(this.listEmployee);
+     async getEmployeePage(pageIndex, pageSize){
+        this.listEmployee = await this.employeeService.getPaging(pageIndex,pageSize);
     },
-    
+
+     /**
+     * Mô tả: Kiểm tra có thay đổi pageSize hay không
+     * Nếu thay đổi thì gọi hàm getEmployeePage
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 23/04/2023
+     */
+    // checkChangePageSize(){
+    //     if(this.pageSize != this.pageSizeOld){
+    //         this.getEmployeePage(this.pageIndex, this.pageSize);
+    //         this.pageSizeOld = this.pageSize;
+    //     }
+    // },
+
      /**
      * Mô tả: Lấy danh sách phòng ban
      * @param: 

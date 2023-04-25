@@ -88,16 +88,16 @@
                         <div class="m-row">
                             <div class="staff-position" id="staff-position">
                                 <label for="">Đơn vị<span class="required">*</span></label>
-                                <TheDropdown 
+                                <MCombobox
                                 tabindex="7"
-                                textSelect = "Chọn công ty" 
+                                textPlaceHolder = "Chọn công ty" 
                                 :items="listDepartmentCombobox" 
                                 :itemSelected ="departmentName"
                                 :isItemObject="true"
                                 @sendItem="receiveItem"
                                 :class="{'error-border':invalidEmployeePosition}"
                                 @sendValidate="onValidateEmployeePosition"
-                                ></TheDropdown>
+                                ></MCombobox>
                                 <p class="error-info margin-0px">{{ errorEmployeePosition }}</p>
                             </div>
                             <div class="staff-cmnd">
@@ -250,6 +250,7 @@ import MISAEnum from '@/helpers/enum';
 import ErrorNotification from './ErrorNotification.vue'
 import NotificationActSave from './NotificationActSave.vue';
 import EmployeeService from '@/services/EmpoyeeService';
+import MCombobox from '../base/MCombobox.vue'
 
 
 export default {
@@ -258,6 +259,7 @@ export default {
   components: {
     ErrorNotification,
     NotificationActSave,
+    MCombobox,
   },
   created() {
     this.displayForm();
