@@ -13,7 +13,8 @@
     "v-click-outside": "^3.2.0",
     "vue": "^3.2.13",
     "vue-router": "^4.1.6",
-    "vuejs-paginate": "^2.1.0"
+    "vuejs-paginate": "^2.1.0",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@babel/core": "^7.12.16",

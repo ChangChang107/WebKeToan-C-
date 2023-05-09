@@ -90,7 +90,7 @@
                                 <label for="">Đơn vị<span class="required">*</span></label>
                                 <MCombobox
                                 tabindex="7"
-                                textPlaceHolder = "Chọn công ty" 
+                                textPlaceHolder = "Chọn đơn vị" 
                                 :items="listDepartmentCombobox" 
                                 :itemSelected ="departmentName"
                                 :isItemObject="true"
@@ -237,7 +237,7 @@
     v-if="showActionMessage"
     :text = "saveEmployeeMsg"
     @onCloseMsg="$event => showActionMessage = false"
-    @onSaveEmployee="$event => btnSaveOnClick()"
+    @onSaveEmployee="$event => {btnSaveOnClick();}"
     @onNoSaveEmployee="$event => noSaveEmployee()"
     ></NotificationActSave>
 
@@ -540,7 +540,7 @@ export default {
                     // Đóng form 
                     this.closeDialog();
                     // reload data
-                    // this.reloadData();
+                    this.reloadData();
                     this.$emit("showAddSuccessToast");
         } else {
             var newEmployeeUpdate = this.employee;
@@ -549,7 +549,7 @@ export default {
                     // Đóng form 
                     this.closeDialog();
                     // reload data
-                    // this.reloadData();
+                    this.reloadData();
                     // this.$emit("reloadEmployee");
                     this.$emit("showUpdateSuccessToast");
         }
@@ -603,7 +603,6 @@ export default {
             };
             this.listDepartmentCombobox.push(newobject);
         }
-        console.log(this.listDepartmentCombobox)
     },
 
      /**
@@ -685,7 +684,7 @@ export default {
      * Created date: 02/04/2023
      */
     reloadData() {
-        location.reload();
+        this.$emit("reloadEmployee");
     },
   },
 }

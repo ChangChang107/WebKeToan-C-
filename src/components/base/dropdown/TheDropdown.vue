@@ -138,6 +138,7 @@ export default {
 <style>
 .dropdown{
     font-family: Roboto;
+    background: #FFFFFF;
     font-size: 14px;
     width: 100%;
     height: 36px;

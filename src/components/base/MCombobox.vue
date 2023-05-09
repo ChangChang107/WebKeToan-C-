@@ -1,8 +1,9 @@
 <template>
-    <div class="dropdown" v-outside="() => this.isOpen = false" @keydown.down="onArrowDown" 
-            @keydown.up="onArrowUp"
-            @keydown.enter="onEnter">
-        <div class="dropdown-select" :class="{ 'border-error': isEmptyInput }">
+    <div class="dropdown"  
+        v-outside="() => this.isOpen = false" @keydown.down="onArrowDown" 
+        @keydown.up="onArrowUp"
+        @keydown.enter="onEnter">
+        <div class="dropdown-select" :class="{ 'border-error': isEmptyInput}">
             <input 
             type="text" 
             :placeholder="textPlaceHolder" 
@@ -11,10 +12,10 @@
             @keydown.up="onArrowUp" @keydown.enter.prevent
             @keydown.enter="onEnter" @blur="sendValidate(search)">
             <div class="icon" @click="btnShow">
-                <i class="fas fa-chevron-down"></i>
+                <i :class="{ 'fa fa-chevron-up': isItemInTop, 'fas fa-chevron-down': !isItemInTop }"></i>
             </div>
         </div>
-        <div class="dropdown-list"  v-show="isOpen">
+        <div class="dropdown-list" :class="{ 'item-top': isItemInTop }" v-show="isOpen">
             <!-- <MsLoading v-if="isLoading"></MsLoading> -->
             <div class="dropdown-list__item" v-for="(result, index) in results" :key="index" @click="setResult(result)"
                 :class="{ 'is-active': index == arrowCounter }">
@@ -52,13 +53,21 @@ export default {
             type: Boolean,
             default: false,
         },
+        isItemInTop: {
+            type: Boolean,
+            default: false,
+        },
+        itemDefault: {
+            type: String,
+            default: '',
+        },
     },
 
     data() {
         return {
             isOpen: false,
             results: this.items,
-            search: '',
+            search: this.itemDefault,
             isLoading: false,
             arrowCounter: -1,
         }
@@ -124,6 +133,7 @@ export default {
             //     this.isLoading = true;
             // } else {
                 this.filterResults();
+                this.findItem();
                 this.isOpen = true;
             // }
         },
@@ -162,6 +172,32 @@ export default {
             }
         },
 
+        /**
+         * Mô tả: 
+         * @param: Hàm tìm kiếm các item
+         * return:
+         * Created by: nttrang
+         * Created date: 18/04/2023
+         */
+         findItem() {
+            this.results = [];
+            if(!this.isItemObject)
+            this.items.forEach(item => {
+                if (item.toLowerCase().includes(this.search.toLowerCase())) {
+                    this.results.push(item);
+                }
+                console.log(this.results);
+            });
+            else {
+                for(let item of this.items) {
+                    if(item.name.toLowerCase().includes(this.search.toLowerCase())) {
+                        this.results.push(item);
+                    }
+                }
+                console.log(this.results);
+            }
+        },
+
          /**
          * Mô tả: 
          * @param: input
@@ -192,5 +228,13 @@ export default {
     outline: none;
     border: solid 1px #50b83c;
     border-radius: 4px;
+}
+
+.border-none{
+    border: none !important;
+}
+
+.item-top{
+    top: -145px !important;
 }
 </style>

@@ -13,7 +13,12 @@
         <div class="page-grid">
             <div class="page-toolbar">
                 <div class="page-toolbar-left">
-                    <input type="text" class="find icon-search" placeholder="Tìm kiếm trong danh sách">
+                    <input 
+                    type="text" 
+                    class="find icon-search" 
+                    placeholder="Tìm kiếm trong danh sách"
+                    v-model="nameSearch"
+                    @keydown.enter="searchByName">
                     <div v-if="check != ''" class="select">
                         <p class="number-selected">Đã chọn</p>
                         <p class="unselected" @click="unSelected()"> bỏ chọn</p>
@@ -24,21 +29,17 @@
                     </div>
                 </div>
                 <div class="page-toolbar-right">
-                    <!-- <MInput v-model="username" 
-                    :placeholder="enterUsername"
-                    ref="username"
-                    :required="true"></MInput> -->
-                    <!-- <TheDropdown 
-                    style="margin-top: 0px;" 
-                    textSelect = "Chọn công ty" 
-                    :items="companies" 
-                    @sendItem="receiveItem"></TheDropdown>  -->
-                    <MCombobox :items="companies"> </MCombobox>
+                    <MCombobox 
+                    style="margin-top: 0px;"
+                    textPlaceHolder = "Chọn đơn vị" 
+                    :items="listDepartmentCombobox" 
+                    @sendItem="receiveItem"
+                    :isItemObject="true"></MCombobox>
                     <div class="btn-icon">
-                        <button class="btn-fill"></button>
+                        <button class="btn-export" @click="exportToExcel"></button>
                     </div>
                     <div class="btn-icon">
-                    <button class="btn-setting"></button>
+                    <button class="btn-reload" @click="reloadPage"></button>
                     </div>
                 </div>  
             </div>
@@ -65,7 +66,7 @@
                     </thead>
                     <tbody>
                         <tr 
-                        v-for="employee in listEmployee" 
+                        v-for="employee in listEmployeeInPage" 
                         :key = "employee.EmployeeId" 
                         @dblclick="$events => rowOnDblClick(employee)">
                             <td class="text-align-center">
@@ -94,20 +95,22 @@
                         <div class="m-pagging-left">Tổng: {{listEmployee.length}}</div>
                 <div class="m-pagging-right">
                     <div class="number-page">
-                        <p>Số bản ghi/trang: </p>
+                        <p>Số bản ghi/trang</p>
                         <div class="page-select">
-                            <select v-model="pageSize">
-                                <option value="15">15</option>
-                                <option value="20">20</option>
-                                <option value="25">25</option>
-                                <option value="30">30</option>
-                            </select>
+                            <MCombobox 
+                            style="width: 76px; margin-left: 65px; margin-bottom: 8px;" 
+                            :items="pageSizeList" 
+                            v-model="pageSize"
+                            :itemDefault="pageSize"
+                            :isItemObject="false"
+                            :isItemInTop="true"
+                            @sendItem="receivePagesize"></MCombobox>
                         </div>
                     </div>
-                    <div class="current-page">1 - {{listEmployee.length}} bản ghi</div>
+                    <div class="current-page">0 - {{listEmployeeInPage.length}} bản ghi</div>
                     <div class="icon">
-                        <div class="prev"></div>
-                        <div class="next"></div>
+                        <button class="prev" @click.prevent="changePrevPage()"></button>
+                        <button class="next" @click.prevent="changeNextPage()"></button>
                     </div>
                 </div>
             </div>
@@ -122,6 +125,7 @@
     @onCloseDialog="$event => showDialog = false"
     @showAddSuccessToast="this.showAddToastMsg()"
     @showUpdateSuccessToast="this.showUpdateToastMsg()"
+    @reloadEmployee="$event => reloadPage()"
     ></DialogEmployee>
 
     <NotificationActDelete
@@ -129,7 +133,7 @@
     v-if="showDeleteMsg"
     :text = "deleteEmployeeMsg"
     @onCloseMsg="$event => showDeleteMsg = false"
-    @onDeleteEmployee="$event => deleteEmployee()"
+    @onDeleteEmployee="$event => {deleteEmployee(); reloadPage();}"
     @onCancelDeleteEmployee="$event => cancelDeleteEmployee()"
     ></NotificationActDelete>
 
@@ -180,10 +184,10 @@ export default {
   created(){
     // Lấy danh sách nhân viên
     this.getEmployee();
-    // this.getEmployeePage();
+    this.getEmployeePage(this.pageIndex, this.pageSize);
     this.getDepartment();
     // console.log("page size: ", this.pageSize);
-
+    this.getDepartmentComboboxs();
   },
 
   beforeUpdate() {
@@ -193,7 +197,6 @@ export default {
 
   data() {
     return{
-        companySelected: "",
         companies: MISAEnum.Companies,
         check:[],
         selectAll: false,
@@ -222,14 +225,114 @@ export default {
         classIconSusscess: MISAEnum.ClassIcon.Success,
 
         // pagging
+        pageIndex: 0,
         pageSize: 15,
-        isStop: false,
+        pageSizeList: [15, 20, 25, 30],
         listEmployeeInPage : [],
+        true: true,
+        false: false,
+
+        // loc
+        listDepartmentCombobox: [],
+
+        nameSearch: "",
 
     }
   },
 
   methods: {
+
+     /**
+     * Mô tả: Hàm tìm kiếm theo tên nhân viên
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 28/04/2023
+     */
+    searchByName(){
+        var array = this.listEmployeeInPage;
+        this.listEmployeeInPage = [];
+        for(let item of array) {
+            if(item.fullName.toLowerCase().includes(this.nameSearch.toLowerCase())) {
+                this.listEmployeeInPage.push(item);
+            }
+            if(item.employeeCode.toLowerCase().includes(this.nameSearch.toLowerCase())) {
+                this.listEmployeeInPage.push(item);
+            }
+        }
+    },
+
+     /**
+     * Mô tả: Hàm reload lại danh sách nhân viên
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 28/04/2023
+     */
+    reloadPage(){
+        this.nameSearch = "";
+        this.getEmployeePage(0, this.pageSize);
+        this.getEmployee();
+        console.log("reload");
+    },
+
+     /**
+     * Mô tả: Lấy tên đơn vị theo id
+     * @param: id của đơn vị
+     * return: tên đơn vị
+     * Created by: nttrang
+     * Created date: 17/04/2023
+     */
+     getDepartmentComboboxs() {
+        for(let item of this.listDepartment) {
+            var newobject = {
+                id: item.departmentId,
+                name: item.departmentName
+            };
+            this.listDepartmentCombobox.push(newobject);
+            console.log("list department: ", this.listDepartmentCombobox);
+        }
+    },
+
+     /**
+     * Mô tả: Chuyển trang khi bấm vào nút prev
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 25/04/2023
+     */
+    changePrevPage(){
+      if(this.pageIndex > 0){
+        this.pageIndex--;
+        this.getEmployeePage(this.pageIndex, this.pageSize);
+      }
+    },
+
+     /**
+     * Mô tả: chuyển trang khi bấm vào nút next
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 25/04/2023
+     */
+    changeNextPage(){
+      if(this.listEmployee.length/this.pageSize > this.pageIndex){
+        this.pageIndex++;
+        this.getEmployeePage(this.pageIndex, this.pageSize);
+      }
+    },
+
+     /**
+     * Mô tả: Hàm thay đổi size trang
+     * @param: 
+     * return: 
+     * Created by: nttrang
+     * Created date: 28/04/2023
+     */
+    receivePagesize(e){
+      this.pageSize = e;
+      this.getEmployeePage(0, this.pageSize);
+    },
 
      /**
      * Mô tả: 
@@ -239,7 +342,12 @@ export default {
      * Created date: 19/04/2023
      */
     receiveItem(e) {
-        this.companySelected = e;
+        this.listEmployeeInPage = [];
+        for(let item of this.listEmployee) {
+            if(item.departmentId == e) {
+                this.listEmployeeInPage.push(item);
+            }
+        }
       },
 
      /**
@@ -332,9 +440,6 @@ export default {
         let newStringId = stringId.replace(',', '');
         // Xóa các bản ghi trong mảng các bản ghi được chọn
         this.employeeService.deleteByIds(newStringId);
-        //reload lại dữ liệu
-        this.getEmployee();
-        console.log(this.listEmployee);
         this.showToastDeleteMsg = true;
         // Xóa các bản ghi vừa bị xóa trong mảng
         this.deleteAllElementInArray(this.check);
@@ -386,7 +491,7 @@ export default {
      * Created date: 12/04/2023
      */
      async getEmployeePage(pageIndex, pageSize){
-        this.listEmployee = await this.employeeService.getPaging(pageIndex,pageSize);
+        this.listEmployeeInPage = await this.employeeService.getPaging(pageIndex,pageSize);
     },
 
      /**
@@ -413,9 +518,13 @@ export default {
      */
     async getDepartment(){
         this.listDepartment = await this.departmentService.getAll();
-        // const element = "11452b0c-768e-5ff7-0d63-eeb1d8ed8cef";
-        // const newArray = this.listDepartment.find(item => item.departmentId == element)
-        // console.log(newArray.departmentName);
+        for(let item of this.listDepartment) {
+            var newobject = {
+                id: item.departmentId,
+                name: item.departmentName
+            };
+            this.listDepartmentCombobox.push(newobject);
+        }
     },
 
      /**
@@ -606,7 +715,7 @@ export default {
     font-family: Roboto;
     font-size: 14px;
     width: 1800px;
-    height: 659px;
+    /* height: 659px; */
     border-collapse: collapse;
 }
 
@@ -631,6 +740,10 @@ export default {
     padding-right: 16px;
 }
 
+.page-grid .m-table tr{
+    height: 48px;
+}
+
 .page-grid .m-table tr:hover{
     background: #F2F2F2;
     cursor: pointer;
@@ -641,6 +754,8 @@ export default {
 }
 
 tbody tr .chucnang {
+    position: sticky;
+    right: 0;
     width: 0px !important;
     padding-left: 0px !important;
     padding-right: 0px !important;
@@ -772,6 +887,7 @@ tbody tr .chucnang .group-icon .icon-etc{
 
 .page-toolbar .page-toolbar-right{
     display: flex;
+    align-items: center;
 }
 
 .page-toolbar .page-toolbar-right sellect{
@@ -780,7 +896,6 @@ tbody tr .chucnang .group-icon .icon-etc{
 }
 
 .page-toolbar .page-toolbar-right .btn-icon{
-    display: none;
     height: 36px;
     width: 36px;
     border: 1px solid #E0E1E4;
@@ -792,29 +907,29 @@ tbody tr .chucnang .group-icon .icon-etc{
     cursor: pointer;
 }
 
-.page-toolbar .page-toolbar-right .btn-fill{
-    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -1602px -91px;
-    width: 20px;
-	height: 19px;
+.page-toolbar .page-toolbar-right .btn-export{
+    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -1211px -90px    ;
+    width: 36px;
+	height: 36px;
     border: none;
     margin-left: 8px;
     margin-top: 10px;
 }
 
-.page-toolbar .page-toolbar-right .btn-fill:hover{
+.page-toolbar .page-toolbar-right .btn-export:hover{
     cursor: pointer;
 }
 
-.page-toolbar .page-toolbar-right .btn-setting{
-    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -676px -30px;
-    width: 23px;
-	height: 24px;
+.page-toolbar .page-toolbar-right .btn-reload{
+    background: url('../../assets/img/Sprites.64af8f61.svg') no-repeat -1098px -90px;
+    width: 36px;
+	height: 36px;
     border: none;
-    margin-left: 7px;
-    margin-top: 7px;
+    margin-left: 8px;
+    margin-top: 10px;
 }
 
-.page-toolbar .page-toolbar-right .btn-setting:hover{
+.page-toolbar .page-toolbar-right .btn-reload:hover{
     cursor: pointer;
 }
 
@@ -824,6 +939,7 @@ tbody tr .chucnang .group-icon .icon-etc{
     display: flex;
     height: 48px;
     width: calc(100% - 32px);
+    background: #F5F5F5;
     border: 1px solid #E0E0E0ed;
     padding-left: 16px;
     padding-right: 16px;
